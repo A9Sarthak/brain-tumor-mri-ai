@@ -1,4 +1,4 @@
-﻿"""
+"""
 Central configuration for Brain Tumor MRI AI classification project.
 """
 import sys
@@ -23,22 +23,41 @@ LOGS_DIR = RESULTS_DIR / "logs"
 MODELS_DIR = PROJECT_ROOT / "models"
 BEST_MODEL_PATH = MODELS_DIR / "resnet50_best.keras"
 
+# Multi-Model Checkpoints
+MODEL_PATHS = {
+    "ResNet50": MODELS_DIR / "resnet50_best.keras",
+    "EfficientNet-B0": MODELS_DIR / "efficientnetb0_best.keras",
+    "MobileNetV2": MODELS_DIR / "mobilenetv2_best.keras",
+    "VGG16": MODELS_DIR / "vgg16_best.keras",
+}
+
+# Grad-CAM Target Convolutional Layers
+GRADCAM_TARGET_LAYERS = {
+    "ResNet50": "conv5_block3_out",
+    "EfficientNet-B0": "top_conv",
+    "MobileNetV2": "Conv_1",
+    "VGG16": "block5_conv3",
+}
+
+
+
 # Manifest Paths
 TRAIN_MANIFEST = PROCESSED_DATA_DIR / "train_manifest.csv"
 VAL_MANIFEST = PROCESSED_DATA_DIR / "val_manifest.csv"
 TEST_MANIFEST = PROCESSED_DATA_DIR / "test_manifest.csv"
 
-# Dataset Specs
-CLASSES = ["glioma", "meningioma", "notumor", "pituitary"]
+# Dataset Specs (Permanently defined order: 0=No Tumor, 1=Glioma, 2=Meningioma, 3=Pituitary)
+CLASSES = ["notumor", "glioma", "meningioma", "pituitary"]
 NUM_CLASSES = len(CLASSES)
 CLASS_TO_IDX = {cls_name: i for i, cls_name in enumerate(CLASSES)}
 IDX_TO_CLASS = {i: cls_name for i, cls_name in enumerate(CLASSES)}
 CLASS_DISPLAY_NAMES = {
+    "notumor": "No Tumor",
     "glioma": "Glioma Tumor",
     "meningioma": "Meningioma Tumor",
-    "notumor": "No Tumor",
     "pituitary": "Pituitary Tumor"
 }
+CLASS_NAMES_LIST = [CLASS_DISPLAY_NAMES[c] for c in CLASSES]
 
 # Image Specs
 IMAGE_SIZE = (224, 224)

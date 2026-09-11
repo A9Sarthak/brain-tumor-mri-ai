@@ -141,12 +141,17 @@ export async function fetchSampleAsFile(sample: SampleItem): Promise<File> {
 }
 
 export async function generateReport(params: {
-  analysis_id: string;
+  analysis_id?: string;
   prediction: string;
   confidence: number;
   probabilities: Record<string, number>;
   image_filename?: string;
   clinical_notes?: string;
+  validation?: any;
+  is_withheld?: boolean;
+  withheld_reason?: string | null;
+  model_name?: string;
+  patient_ref?: string;
 }): Promise<ReportResponse> {
   const res = await fetch(`${API_BASE_URL}/api/report`, {
     method: 'POST',
@@ -158,8 +163,11 @@ export async function generateReport(params: {
       prediction: params.prediction,
       confidence: params.confidence,
       probabilities: params.probabilities,
-      image_filename: params.image_filename || 'mri_scan.jpg',
+      image_filename: params.image_filename || params.patient_ref || 'mri_scan.jpg',
       clinical_notes: params.clinical_notes || '',
+      validation: params.validation,
+      is_withheld: params.is_withheld,
+      withheld_reason: params.withheld_reason,
     }),
   });
 

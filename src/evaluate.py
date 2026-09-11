@@ -1,4 +1,4 @@
-﻿"""
+"""
 Comprehensive model evaluation, baseline comparison, metrics calculation,
 and programmatic confusion matrix visualization.
 """
@@ -37,7 +37,7 @@ from src.utils import (
     detect_hardware,
 )
 from src.data_loader import create_tf_dataset
-
+from src.preprocessing import get_model_preprocess_fn
 
 def evaluate_majority_baseline(
     train_manifest: Path = TRAIN_MANIFEST,
@@ -72,6 +72,7 @@ def evaluate_majority_baseline(
 
 def evaluate_model_on_test_set(
     model: tf.keras.Model,
+    arch_name: str = "EfficientNet-B0",
     test_manifest: Path = TEST_MANIFEST,
     batch_size: int = BATCH_SIZE
 ) -> Tuple[dict, np.ndarray, np.ndarray]:
@@ -79,12 +80,22 @@ def evaluate_model_on_test_set(
     Run full inference on held-out test split and calculate comprehensive multiclass metrics.
     """
     test_df = pd.read_csv(test_manifest)
-    test_ds = create_tf_dataset(test_df, batch_size=batch_size, is_training=False, augment=False)
+    preprocess_fn = get_model_preprocess_fn(arch_name)
+    test_ds = create_tf_dataset(test_df, batch_size=batch_size, is_training=False, augment=False, preprocess_fn=preprocess_fn)
 
-    print("Running inference across held-out test split...")
+    print(f"Running inference across held-out test split for {arch_name}...")
     y_probs = model.predict(test_ds, verbose=1)
     y_pred = np.argmax(y_probs, axis=1)
     y_true = test_df["label_idx"].values
+
+    # Add prediction distribution logging
+    display_names = [CLASS_DISPLAY_NAMES[c] for c in CLASSES]
+    unique, counts = np.unique(y_pred, return_counts=True)
+    pred_dist = {CLASS_DISPLAY_NAMES[CLASSES[i]]: int(c) for i, c in zip(unique, counts)}
+    for name in display_names:
+        if name not in pred_dist:
+            pred_dist[name] = 0
+    print(f"\nPrediction count by class: {pred_dist}")
 
     acc = float(accuracy_score(y_true, y_pred))
     prec_macro = float(precision_score(y_true, y_pred, average="macro", zero_division=0))
@@ -97,20 +108,22 @@ def evaluate_model_on_test_set(
     report_dict = classification_report(
         y_true,
         y_pred,
-        target_names=CLASSES,
+        target_names=display_names,
         output_dict=True,
         zero_division=0
     )
     report_text = classification_report(
         y_true,
         y_pred,
-        target_names=CLASSES,
+        target_names=display_names,
         zero_division=0
     )
 
     metrics = {
         "model_name": model.name,
+        "architecture": arch_name,
         "test_sample_count": int(len(y_true)),
+        "prediction_distribution": pred_dist,
         "accuracy": acc,
         "precision_macro": prec_macro,
         "precision_weighted": prec_weighted,
@@ -131,7 +144,18 @@ def run_full_evaluation(model_path: Path = BEST_MODEL_PATH) -> dict:
     if not model_path.exists():
         raise FileNotFoundError(f"Model checkpoint not found at {model_path}")
 
-    print(f"Loading best model checkpoint from {model_path}...")
+    # Infer arch from filename
+    filename = model_path.stem.lower()
+    if "efficientnet" in filename:
+        arch_name = "EfficientNet-B0"
+    elif "mobilenet" in filename:
+        arch_name = "MobileNetV2"
+    elif "vgg" in filename:
+        arch_name = "VGG16"
+    else:
+        arch_name = "ResNet50"
+
+    print(f"Loading {arch_name} model checkpoint from {model_path}...")
     model = tf.keras.models.load_model(model_path)
 
     # 1. Baseline Evaluation
@@ -141,28 +165,29 @@ def run_full_evaluation(model_path: Path = BEST_MODEL_PATH) -> dict:
     save_json(baseline_metrics, baseline_file)
     print(f"Baseline Accuracy: {baseline_metrics['accuracy']:.4f}")
 
-    # 2. ResNet50 Evaluation
-    print("\n--- Evaluating ResNet50 on Held-out Test Set ---")
-    metrics, y_true, y_pred = evaluate_model_on_test_set(model)
+    # 2. Model Evaluation
+    print(f"\n--- Evaluating {arch_name} on Held-out Test Set ---")
+    metrics, y_true, y_pred = evaluate_model_on_test_set(model, arch_name=arch_name)
 
     # Save Metrics
-    metrics_file = METRICS_DIR / "resnet50_test_metrics.json"
+    metrics_file = METRICS_DIR / f"{arch_name.lower()}_test_metrics.json"
     save_json(metrics, metrics_file)
 
-    report_txt_file = METRICS_DIR / "classification_report.txt"
+    report_txt_file = METRICS_DIR / f"{arch_name.lower()}_classification_report.txt"
     with open(report_txt_file, "w", encoding="utf-8") as f:
         f.write(metrics["classification_report_text"])
 
     # 3. Generate Confusion Matrix Plot
-    cm_path = CONFUSION_MATRICES_DIR / "confusion_matrix.png"
-    plot_confusion_matrix_heatmap(y_true, y_pred, CLASSES, cm_path)
+    cm_path = CONFUSION_MATRICES_DIR / f"{arch_name.lower()}_confusion_matrix.png"
+    display_names = [CLASS_DISPLAY_NAMES[c] for c in CLASSES]
+    plot_confusion_matrix_heatmap(y_true, y_pred, display_names, cm_path, title=f"{arch_name} Confusion Matrix (Held-out Test Set)")
     print(f"Saved confusion matrix plot to: {cm_path}")
 
     # Summary Output
     print("\n" + "=" * 60)
     print("HELD-OUT TEST SET EVALUATION SUMMARY")
     print("=" * 60)
-    print(f"{'Metric':<25} | {'Baseline':<14} | {'ResNet50':<14}")
+    print(f"{'Metric':<25} | {'Baseline':<14} | {arch_name:<14}")
     print("-" * 60)
     print(f"{'Accuracy':<25} | {baseline_metrics['accuracy']*100:6.2f}%       | {metrics['accuracy']*100:6.2f}%")
     print(f"{'Macro Precision':<25} | {baseline_metrics['precision_macro']*100:6.2f}%       | {metrics['precision_macro']*100:6.2f}%")

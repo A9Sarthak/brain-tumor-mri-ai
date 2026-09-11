@@ -1,4 +1,4 @@
-﻿"""
+"""
 Utility functions for logging, reproducibility, hardware detection,
 image verification, and metric visualizations.
 """
@@ -123,20 +123,21 @@ def plot_class_distribution(distribution_data: Dict[str, Dict[str, int]], output
     plt.close()
 
 
-def plot_training_history(history: Dict[str, list], output_dir: Path) -> Tuple[Path, Path]:
+def plot_training_history(history: Dict[str, list], output_dir: Path, arch_name: str = "EfficientNet-B0") -> Tuple[Path, Path]:
     """
     Plot and save training/validation accuracy and loss curves programmatically.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     epochs = range(1, len(history["accuracy"]) + 1)
+    slug = arch_name.lower().replace("-", "").replace("_", "")
     
     # 1. Accuracy Curve
-    acc_path = output_dir / "resnet50_accuracy.png"
+    acc_path = output_dir / f"{slug}_accuracy.png"
     plt.figure(figsize=(8, 5))
     plt.plot(epochs, history["accuracy"], "o-", label="Training Accuracy", color="#1f77b4", linewidth=2)
     if "val_accuracy" in history:
         plt.plot(epochs, history["val_accuracy"], "s-", label="Validation Accuracy", color="#ff7f0e", linewidth=2)
-    plt.title("ResNet50 Classification Accuracy vs. Epochs", fontsize=13, fontweight="bold")
+    plt.title(f"{arch_name} Classification Accuracy vs. Epochs", fontsize=13, fontweight="bold")
     plt.xlabel("Epoch", fontsize=11)
     plt.ylabel("Accuracy", fontsize=11)
     plt.legend(frameon=True, loc="lower right")
@@ -146,12 +147,12 @@ def plot_training_history(history: Dict[str, list], output_dir: Path) -> Tuple[P
     plt.close()
     
     # 2. Loss Curve
-    loss_path = output_dir / "resnet50_loss.png"
+    loss_path = output_dir / f"{slug}_loss.png"
     plt.figure(figsize=(8, 5))
     plt.plot(epochs, history["loss"], "o-", label="Training Loss", color="#1f77b4", linewidth=2)
     if "val_loss" in history:
         plt.plot(epochs, history["val_loss"], "s-", label="Validation Loss", color="#d62728", linewidth=2)
-    plt.title("ResNet50 Categorical Cross-Entropy Loss vs. Epochs", fontsize=13, fontweight="bold")
+    plt.title(f"{arch_name} Categorical Cross-Entropy Loss vs. Epochs", fontsize=13, fontweight="bold")
     plt.xlabel("Epoch", fontsize=11)
     plt.ylabel("Loss", fontsize=11)
     plt.legend(frameon=True, loc="upper right")

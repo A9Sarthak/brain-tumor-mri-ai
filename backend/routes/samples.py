@@ -26,8 +26,8 @@ SAMPLE_DEFINITIONS = [
         "id": "meningioma",
         "class_name": "meningioma",
         "display_name": "Meningioma Tumor",
-        "filename": "Te-me_1.jpg",
-        "src_path": RAW_DATA_DIR / "Testing" / "meningioma" / "Te-me_1.jpg",
+        "filename": "Te-me_11.jpg",
+        "src_path": RAW_DATA_DIR / "Testing" / "meningioma" / "Te-me_11.jpg",
     },
     {
         "id": "pituitary",

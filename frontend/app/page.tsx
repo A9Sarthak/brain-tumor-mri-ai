@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from 'react';
 import { X, AlertCircle } from 'lucide-react';
-import DisclaimerBanner from '../components/DisclaimerBanner';
 import HeroSection from '../components/HeroSection';
 import UploadCard from '../components/UploadCard';
 import ResultCard from '../components/ResultCard';
@@ -11,6 +10,7 @@ import SampleSelector from '../components/SampleSelector';
 import ReportCard from '../components/ReportCard';
 import BrainTumorInfo from '../components/BrainTumorInfo';
 import ReportModal from '../components/ReportModal';
+import InputValidationCard from '../components/InputValidationCard';
 import { 
   analyzeImage, 
   analyzeSample, 
@@ -38,15 +38,18 @@ export default function AnalyzePage() {
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     setSelectedSampleId(null);
+    setErrorMessage(null);
     setPrediction(null);
     setGradcam(null);
-    setErrorMessage(null);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    // Auto-scroll to workspace
+    workspaceRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+    // Auto-trigger analysis
+    handleAnalyze(file);
   };
 
   const handleRemove = () => {
@@ -68,18 +71,26 @@ export default function AnalyzePage() {
 
     try {
       let predResult: PredictionResponse;
-      let gradcamResult: GradcamResponse;
+      let gradcamResult: GradcamResponse | null = null;
 
       if (file && file.size > 0) {
         predResult = await analyzeImage(file);
         setPrediction(predResult);
-        gradcamResult = await getGradcam(file, predResult.predicted_index);
-        setGradcam(gradcamResult);
+        if (!predResult.is_withheld) {
+          gradcamResult = await getGradcam(file, predResult.predicted_index);
+          setGradcam(gradcamResult);
+        } else {
+          setGradcam(null);
+        }
       } else if (selectedSampleId) {
         predResult = await analyzeSample(selectedSampleId);
         setPrediction(predResult);
-        gradcamResult = await getGradcamForSample(selectedSampleId);
-        setGradcam(gradcamResult);
+        if (!predResult.is_withheld) {
+          gradcamResult = await getGradcamForSample(selectedSampleId);
+          setGradcam(gradcamResult);
+        } else {
+          setGradcam(null);
+        }
       } else {
         return;
       }
@@ -90,9 +101,9 @@ export default function AnalyzePage() {
         prediction: predResult.prediction,
         confidence: predResult.confidence,
         timestamp: new Date().toISOString(),
-        thumbnail: previewUrl || toDataUrl(gradcamResult.original_image_base64),
+        thumbnail: previewUrl || (gradcamResult ? toDataUrl(gradcamResult.original_image_base64) : ''),
         probabilities: predResult.probabilities,
-        gradcam: gradcamResult,
+        gradcam: gradcamResult || undefined,
       };
 
       try {
@@ -138,9 +149,14 @@ export default function AnalyzePage() {
       const predResult = await analyzeSample(sample.id);
       setPrediction(predResult);
 
-      // 2. Run real Grad-CAM generation for the sample
-      const gradcamResult = await getGradcamForSample(sample.id);
-      setGradcam(gradcamResult);
+      let gradcamResult: GradcamResponse | null = null;
+      if (!predResult.is_withheld) {
+        // 2. Run real Grad-CAM generation for the sample
+        gradcamResult = await getGradcamForSample(sample.id);
+        setGradcam(gradcamResult);
+      } else {
+        setGradcam(null);
+      }
 
       // 3. Save to session-only history in localStorage
       const historyItem: HistoryItem = {
@@ -148,9 +164,9 @@ export default function AnalyzePage() {
         prediction: predResult.prediction,
         confidence: predResult.confidence,
         timestamp: new Date().toISOString(),
-        thumbnail: sample.image_url || toDataUrl(gradcamResult.original_image_base64),
+        thumbnail: sample.image_url || (gradcamResult ? toDataUrl(gradcamResult.original_image_base64) : ''),
         probabilities: predResult.probabilities,
-        gradcam: gradcamResult,
+        gradcam: gradcamResult || undefined,
       };
 
       try {
@@ -173,10 +189,7 @@ export default function AnalyzePage() {
   return (
     <div className="space-y-6">
       
-      {/* 1. Clinical Research Notice */}
-      <DisclaimerBanner />
-
-      {/* 2. Hero Section & Feature Strip */}
+      {/* 1. Hero Section & Feature Strip */}
       <HeroSection
         onUploadClick={() => workspaceRef.current?.scrollIntoView({ behavior: 'smooth' })}
         onExampleClick={() => examplesRef.current?.scrollIntoView({ behavior: 'smooth' })}
@@ -196,6 +209,14 @@ export default function AnalyzePage() {
             <X className="w-4 h-4" />
           </button>
         </div>
+      )}
+
+      {/* 2. Input Validation Gate (Quality Check + OOD Detection) */}
+      {(prediction?.validation || isAnalyzing) && (
+        <InputValidationCard
+          validation={prediction?.validation}
+          isLoading={isAnalyzing}
+        />
       )}
 
       {/* 3. Three-Step Analysis Workspace */}

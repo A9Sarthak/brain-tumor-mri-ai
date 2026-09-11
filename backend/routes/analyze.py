@@ -6,6 +6,8 @@ from backend.services.model_service import ModelService
 from backend.services.gradcam_service import GradcamService
 from backend.routes.samples import resolve_sample_file
 
+from backend.services.input_validation import InputValidationService
+
 router = APIRouter(prefix="/api", tags=["analyze"])
 
 VALID_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
@@ -34,7 +36,6 @@ async def analyze_mri(
                 with open(sample_path, "rb") as f:
                     contents = f.read()
             elif any(s in (file.filename or "").lower() for s in ["te-no", "te-gl", "te-me", "te-pi", "glioma", "meningioma", "pituitary", "notumor"]):
-                # Detect matching sample from filename
                 matched_id = "notumor" if "no" in file.filename.lower() else "glioma" if "gl" in file.filename.lower() else "meningioma" if "me" in file.filename.lower() else "pituitary"
                 sample_path = resolve_sample_file(matched_id)
                 with open(sample_path, "rb") as f:
@@ -45,15 +46,46 @@ async def analyze_mri(
         if len(contents) > MAX_FILE_SIZE_BYTES:
             raise HTTPException(status_code=400, detail="File exceeds maximum allowed size of 200MB.")
     else:
-        # Load sample from disk using verified sample repository
         sample_path = resolve_sample_file(sample_class)
         with open(sample_path, "rb") as f:
             contents = f.read()
 
+    # Step 1: Execute Independent Safety / Input Validation Layer
+    validation = InputValidationService.validate_input(contents)
+
+    # If file is technically rejected (corrupted, completely blank, unreadable)
+    if validation["action"] == "reject":
+        return PredictionResponse(
+            analysis_id=str(uuid.uuid4()),
+            prediction="Rejected: Unusable Image",
+            predicted_index=-1,
+            confidence=0.0,
+            probabilities={"No Tumor": 0.0, "Glioma Tumor": 0.0, "Meningioma Tumor": 0.0, "Pituitary Tumor": 0.0},
+            processing_time_ms=0.0,
+            validation=validation,
+            is_withheld=True,
+            withheld_reason=validation["reason"] or "Input image failed technical quality inspection."
+        )
+
+    # If image is out-of-distribution (photo, document, screenshot, random object)
+    if validation["action"] == "withhold":
+        return PredictionResponse(
+            analysis_id=str(uuid.uuid4()),
+            prediction="Input Outside Expected Model Distribution",
+            predicted_index=-1,
+            confidence=0.0,
+            probabilities={"No Tumor": 0.0, "Glioma Tumor": 0.0, "Meningioma Tumor": 0.0, "Pituitary Tumor": 0.0},
+            processing_time_ms=0.0,
+            validation=validation,
+            is_withheld=True,
+            withheld_reason="This image appears substantially different from the MRI data used by this model. A reliable classification cannot be provided."
+        )
+
+    # Step 2: Accepted MRI -> Run EXACT EXISTING PREPROCESSING & EFFICIENTNET-B0
     try:
         processed_tensor, _ = model_service.preprocess_image_bytes(contents)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid image content: Unable to decode MRI scan.")
+        raise HTTPException(status_code=400, detail="Invalid image content: Unable to decode MRI scan.")
 
     result = model_service.predict(processed_tensor)
     analysis_id = str(uuid.uuid4())
@@ -64,7 +96,10 @@ async def analyze_mri(
         predicted_index=result["predicted_index"],
         confidence=result["confidence"],
         probabilities=result["probabilities"],
-        processing_time_ms=result["processing_time_ms"]
+        processing_time_ms=result["processing_time_ms"],
+        validation=validation,
+        is_withheld=False,
+        withheld_reason=None
     )
 
 @router.post("/gradcam", response_model=GradcamResponse)
@@ -97,6 +132,13 @@ async def generate_gradcam(
         with open(sample_path, "rb") as f:
             contents = f.read()
 
+
+    validation = InputValidationService.validate_input(contents)
+    if not validation["is_acceptable"]:
+        raise HTTPException(
+            status_code=400, 
+            detail="Grad-CAM visualization is unavailable for invalid or out-of-distribution inputs."
+        )
 
     try:
         processed_tensor, orig_np = model_service.preprocess_image_bytes(contents)

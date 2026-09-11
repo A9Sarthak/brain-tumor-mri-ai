@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '../components/ThemeProvider';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 export const metadata: Metadata = {
   title: 'NeuroScan AI — Clinical Brain MRI Analysis & Interpretability',
@@ -22,7 +21,6 @@ export default function RootLayout({
           <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {children}
           </main>
-          <Footer />
         </ThemeProvider>
       </body>
     </html>

@@ -16,7 +16,6 @@ export default function ReportCard({ onGenerateReport, hasAnalysis }: ReportCard
     'Grad-CAM attention visualization',
     'Model & architecture parameters',
     'Cryptographic analysis timestamp',
-    'Responsible AI research disclaimer',
   ];
 
   return (

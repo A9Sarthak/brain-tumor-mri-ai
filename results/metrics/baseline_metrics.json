@@ -1,7 +1,7 @@
 {
   "model_name": "Majority-Class Naive Baseline",
-  "predicted_class_index": 2,
-  "predicted_class_name": "notumor",
+  "predicted_class_index": 3,
+  "predicted_class_name": "pituitary",
   "test_sample_count": 1600,
   "accuracy": 0.25,
   "precision_macro": 0.0625,

@@ -1,3 +1,34 @@
+export interface QualityChecks {
+  readable: boolean;
+  dimensions: boolean;
+  brightness: boolean;
+  contrast: boolean;
+  sharpness: boolean;
+}
+
+export interface QualityResult {
+  status: 'good' | 'fair' | 'poor' | 'rejected';
+  score: number;
+  warnings: string[];
+  checks: QualityChecks;
+  metrics?: Record<string, any>;
+}
+
+export interface OODResult {
+  status: 'in_distribution' | 'uncertain' | 'out_of_distribution';
+  score: number;
+  warning?: string | null;
+  metrics?: Record<string, any>;
+}
+
+export interface ValidationResult {
+  quality: QualityResult;
+  ood: OODResult;
+  is_acceptable: boolean;
+  action: 'proceed' | 'withhold' | 'reject';
+  reason?: string | null;
+}
+
 export interface PredictionResponse {
   analysis_id: string;
   prediction: string;
@@ -5,6 +36,9 @@ export interface PredictionResponse {
   confidence: number;
   probabilities: Record<string, number>;
   processing_time_ms: number;
+  validation?: ValidationResult;
+  is_withheld?: boolean;
+  withheld_reason?: string | null;
 }
 
 export interface GradcamResponse {

@@ -9,6 +9,33 @@ class HealthResponse(BaseModel):
     num_classes: int
     classes: List[str]
 
+class QualityChecks(BaseModel):
+    readable: bool
+    dimensions: bool
+    brightness: bool
+    contrast: bool
+    sharpness: bool
+
+class QualityResult(BaseModel):
+    status: str  # good, fair, poor, rejected
+    score: int
+    warnings: List[str]
+    checks: QualityChecks
+    metrics: Optional[Dict[str, Any]] = None
+
+class OODResult(BaseModel):
+    status: str  # in_distribution, uncertain, out_of_distribution
+    score: float
+    warning: Optional[str] = None
+    metrics: Optional[Dict[str, Any]] = None
+
+class ValidationResult(BaseModel):
+    quality: QualityResult
+    ood: OODResult
+    is_acceptable: bool
+    action: str  # proceed, withhold, reject
+    reason: Optional[str] = None
+
 class PredictionResponse(BaseModel):
     analysis_id: str
     prediction: str
@@ -16,6 +43,9 @@ class PredictionResponse(BaseModel):
     confidence: float
     probabilities: Dict[str, float]
     processing_time_ms: float
+    validation: Optional[ValidationResult] = None
+    is_withheld: bool = False
+    withheld_reason: Optional[str] = None
 
 class GradcamResponse(BaseModel):
     analysis_id: str
@@ -57,11 +87,16 @@ class SampleItem(BaseModel):
     image_url: str
 
 class ReportRequest(BaseModel):
-    analysis_id: str
+    analysis_id: Optional[str] = None
     prediction: str
     confidence: float
     probabilities: Dict[str, float]
-    timestamp: str
+    timestamp: Optional[str] = None
+    validation: Optional[ValidationResult] = None
+    is_withheld: Optional[bool] = False
+    withheld_reason: Optional[str] = None
+    image_filename: Optional[str] = None
+    clinical_notes: Optional[str] = None
 
 class ReportResponse(BaseModel):
     analysis_id: str

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modular preprocessing and augmentation pipeline for Brain Tumor MRI images.
 """
 from typing import Callable, Tuple
@@ -9,6 +9,19 @@ from src.config import IMAGE_SIZE, INPUT_SHAPE
 def get_resnet50_preprocess_fn() -> Callable[[tf.Tensor], tf.Tensor]:
     """Return ResNet50 specific preprocessing function (zero-centered around ImageNet means)."""
     return tf.keras.applications.resnet50.preprocess_input
+
+
+def get_model_preprocess_fn(architecture_name: str = "ResNet50") -> Callable[[tf.Tensor], tf.Tensor]:
+    """Return architecture-specific preprocessing function."""
+    arch = architecture_name.lower().replace("-", "").replace("_", "")
+    if "efficientnet" in arch:
+        return tf.keras.applications.efficientnet.preprocess_input
+    elif "mobilenet" in arch:
+        return tf.keras.applications.mobilenet_v2.preprocess_input
+    elif "vgg" in arch:
+        return tf.keras.applications.vgg16.preprocess_input
+    else:
+        return tf.keras.applications.resnet50.preprocess_input
 
 
 def build_augmentation_layer() -> tf.keras.Sequential:

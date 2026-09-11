@@ -3,11 +3,8 @@ import {
   Info, 
   Cpu, 
   Eye, 
-  ShieldCheck, 
   Layers, 
-  CheckCircle2,
-  Lock,
-  GitBranch
+  CheckCircle2
 } from 'lucide-react';
 export default function AboutPage() {
   return (
@@ -118,26 +115,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* Data Privacy & Security */}
-      <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-3">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Lock className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-          Privacy &amp; Data Governance
-        </h2>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-          All inference occurs transiently in-memory. Uploaded MRI scans are never persisted to disk or external databases by default. The session history is maintained strictly on the user&apos;s local browser workstation, ensuring patient privacy and compliance with research data handling guidelines.
-        </p>
-      </section>
-
-      {/* Model Protection Lock */}
-      <section className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 text-xs text-slate-500 dark:text-slate-400 flex items-start gap-3">
-        <GitBranch className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-        <div>
-          <strong className="text-slate-700 dark:text-slate-300">Model Lineage &amp; Integrity: </strong>
-          The underlying model weights (<code className="font-mono">best_efficientnet_model.keras</code>) and 4-class taxonomy are authoritative and strictly locked. The modern web stack migration maintains exact input preprocessing (224x224x3, RGB, standard scale) and numerical equivalence with validated benchmark evaluation scripts.
-        </div>
-      </section>
-
     </div>
   );
 }
+
