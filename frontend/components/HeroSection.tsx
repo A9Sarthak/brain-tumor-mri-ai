@@ -8,7 +8,7 @@ import {
   Cpu, 
   Eye, 
   Microscope, 
-  Lock,
+  ShieldCheck,
   Activity,
   ScanLine
 } from 'lucide-react';
@@ -173,14 +173,14 @@ export default function HeroSection({ onUploadClick, onExampleClick }: HeroSecti
 
         <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-2xs">
           <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 shrink-0">
-            <Lock className="w-4 h-4" />
+            <ShieldCheck className="w-4 h-4" />
           </div>
           <div>
             <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-              Privacy Focused
+              Input Validation
             </h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Transient in-memory execution with zero data retention.
+              Automated scan decodability, contrast, and sharpness checks.
             </p>
           </div>
         </div>
