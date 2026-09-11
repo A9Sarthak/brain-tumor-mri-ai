@@ -92,45 +92,63 @@ The authoritative class indexing is locked to:
 
 ---
 
-## 4. Running Locally
+## 4. Setup & Running Locally
 
 ### Prerequisites
-- Python 3.10 or 3.11
-- Node.js 18+ and npm
-
-## 4. Quick Start Guide
-
-### Option A: One-Click Launcher (Easiest)
-Simply double-click **`start.bat`** in the project root.
-- Automatically launches the FastAPI backend in a separate window.
-- Automatically launches the Next.js frontend in a separate window.
-- Automatically opens **`http://localhost:3000`** in your default web browser!
+- **Python**: 3.10 or 3.11 (with "Add to PATH" checked)
+- **Node.js**: 18+ LTS or 20+ LTS ([Download from nodejs.org](https://nodejs.org/))
 
 ---
 
-### Option B: Separate Launch Scripts
+### Step 1: First-Time Automatic Setup (Any New Device)
+
+On any newly cloned device, run the automatic setup file:
+
+- **Windows**: Double-click **`setup.bat`** (or run `setup.bat` in CMD / PowerShell)
+- **macOS / Linux**: Run `./setup.sh`
+
+This script will automatically:
+1. Detect Python and create an isolated virtual environment (`.venv`).
+2. Upgrade `pip` and install all required AI/ML + FastAPI dependencies from `requirements.txt`.
+3. Detect Node.js and install all Next.js frontend packages (`npm install`).
+4. Build the production-optimized Next.js frontend (`npm run build`).
+5. Verify model weights and offer to launch the platform immediately.
+
+---
+
+### Step 2: Starting the Application
+
+Once setup is complete, you can launch NeuroScan AI anytime:
+
+#### Option A: One-Click Launcher (Recommended)
+Double-click **`start.bat`** in the project root.
+- Automatically launches the FastAPI backend in a separate terminal window.
+- Automatically launches the Next.js frontend in a separate terminal window.
+- Automatically opens **`http://localhost:3000`** in your default web browser!
+
+#### Option B: Separate Launch Scripts
 - **Start Backend**: Double-click `start_backend.bat` (serves API on `http://127.0.0.1:8000`)
 - **Start Frontend**: Double-click `start_frontend.bat` (serves UI on `http://localhost:3000`)
 
----
+#### Option C: Manual Terminal Commands
 
-### Option C: Manual Command Line
-
-#### 1. Start the FastAPI Backend
+**Terminal 1 — Backend:**
 ```bash
-# In the project root with the virtual environment:
+# Windows
 .venv\Scripts\uvicorn.exe backend.main:app --host 127.0.0.1 --port 8000
-```
-Backend will be available at: `http://127.0.0.1:8000` (API documentation at `http://127.0.0.1:8000/docs`).
 
-#### 2. Start the Next.js Frontend
+# macOS / Linux
+source .venv/bin/activate
+uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
+
+**Terminal 2 — Frontend:**
 ```bash
 cd frontend
-cmd.exe /c "set PATH=C:\Users\darsh\node-v20.18.0-win-x64;%PATH% && npm run start -- -p 3000"
-# Or in dev mode:
-cmd.exe /c "set PATH=C:\Users\darsh\node-v20.18.0-win-x64;%PATH% && npm run dev"
+npm run start -- -p 3000
+# or development mode:
+npm run dev
 ```
-Frontend will be available at: `http://localhost:3000`.
 
 ---
 
