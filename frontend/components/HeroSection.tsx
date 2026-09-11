@@ -180,7 +180,7 @@ export default function HeroSection({ onUploadClick, onExampleClick }: HeroSecti
               Input Validation
             </h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Automated scan decodability, contrast, and sharpness checks.
+              Pre-inference validation ensuring uploaded scans meet medical imaging standards.
             </p>
           </div>
         </div>
