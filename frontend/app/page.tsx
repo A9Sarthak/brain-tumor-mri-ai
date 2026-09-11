@@ -15,7 +15,6 @@ import ResultCard from '../components/ResultCard';
 import GradcamViewer from '../components/GradcamViewer';
 import SampleSelector from '../components/SampleSelector';
 import ReportModal from '../components/ReportModal';
-import DisclaimerBanner from '../components/DisclaimerBanner';
 import { 
   analyzeImage, 
   analyzeSample, 
@@ -66,22 +65,31 @@ export default function AnalyzePage() {
 
   const handleAnalyze = async (fileToAnalyze?: File) => {
     const file = fileToAnalyze || selectedFile;
-    if (!file) return;
+    if (!file && !selectedSampleId) return;
 
     setIsAnalyzing(true);
     setIsGradcamLoading(true);
     setErrorMessage(null);
 
     try {
-      // 1. Run real EfficientNet-B0 inference
-      const predResult = await analyzeImage(file);
-      setPrediction(predResult);
+      let predResult: PredictionResponse;
+      let gradcamResult: GradcamResponse;
 
-      // 2. Run real Grad-CAM generation
-      const gradcamResult = await getGradcam(file, predResult.predicted_index);
-      setGradcam(gradcamResult);
+      if (file && file.size > 0) {
+        predResult = await analyzeImage(file);
+        setPrediction(predResult);
+        gradcamResult = await getGradcam(file, predResult.predicted_index);
+        setGradcam(gradcamResult);
+      } else if (selectedSampleId) {
+        predResult = await analyzeSample(selectedSampleId);
+        setPrediction(predResult);
+        gradcamResult = await getGradcamForSample(selectedSampleId);
+        setGradcam(gradcamResult);
+      } else {
+        return;
+      }
 
-      // 3. Save to session-only history in localStorage
+      // Save to session-only history in localStorage
       const historyItem: HistoryItem = {
         id: predResult.analysis_id,
         prediction: predResult.prediction,
@@ -116,7 +124,14 @@ export default function AnalyzePage() {
     setPrediction(null);
     setGradcam(null);
     setPreviewUrl(sample.image_url);
-    setSelectedFile(new File([], sample.filename, { type: 'image/jpeg' }));
+
+    // Fetch the real sample image blob so selectedFile has actual image bytes
+    fetch(sample.image_url)
+      .then((r) => r.blob())
+      .then((blob) => {
+        setSelectedFile(new File([blob], sample.filename, { type: blob.type || 'image/jpeg' }));
+      })
+      .catch(() => {});
 
     // Scroll smoothly to workspace
     workspaceRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -161,12 +176,9 @@ export default function AnalyzePage() {
     }
   };
 
-
   return (
     <div className="space-y-8">
-      
-      {/* Medical Disclaimer Banner */}
-      <DisclaimerBanner />
+
 
       {/* Hero Section */}
       <section className="text-center py-6 sm:py-10 max-w-3xl mx-auto space-y-4">

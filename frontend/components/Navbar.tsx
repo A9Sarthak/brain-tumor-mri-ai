@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Sun, Moon, ShieldCheck } from 'lucide-react';
+import { Activity, Sun, Moon } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 
 export default function Navbar() {
@@ -63,13 +63,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right Side: Status Badge & Theme Toggle */}
+        {/* Right Side: Theme Toggle */}
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span className="font-medium">Model Online</span>
-          </div>
 
           <button
             onClick={toggleTheme}

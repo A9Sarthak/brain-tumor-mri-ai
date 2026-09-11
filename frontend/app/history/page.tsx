@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { HistoryItem } from '../../lib/types';
 import { toDataUrl } from '../../lib/api';
-import DisclaimerBanner from '../../components/DisclaimerBanner';
 import ReportModal from '../../components/ReportModal';
 
 export default function HistoryPage() {
@@ -41,7 +40,7 @@ export default function HistoryPage() {
 
   return (
     <div className="space-y-8">
-      <DisclaimerBanner />
+
 
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">

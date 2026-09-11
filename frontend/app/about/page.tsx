@@ -9,12 +9,10 @@ import {
   Lock,
   GitBranch
 } from 'lucide-react';
-import DisclaimerBanner from '../../components/DisclaimerBanner';
-
 export default function AboutPage() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
-      <DisclaimerBanner />
+
 
       {/* Page Header */}
       <div className="border-b border-slate-200 dark:border-slate-800 pb-5">

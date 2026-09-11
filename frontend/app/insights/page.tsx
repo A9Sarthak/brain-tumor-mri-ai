@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { getPerformance } from '../../lib/api';
 import { PerformanceResponse } from '../../lib/types';
-import DisclaimerBanner from '../../components/DisclaimerBanner';
 
 export default function InsightsPage() {
   const [metrics, setMetrics] = useState<PerformanceResponse | null>(null);
@@ -86,7 +85,6 @@ export default function InsightsPage() {
 
   return (
     <div className="space-y-8">
-      <DisclaimerBanner />
 
       {/* Page Header */}
       <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
