@@ -1,19 +1,15 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { 
-  Sparkles, 
-  Cpu, 
-  Eye, 
-  Microscope, 
-  HeartHandshake, 
-  ArrowDown, 
-  Upload
-} from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
+import DisclaimerBanner from '../components/DisclaimerBanner';
+import HeroSection from '../components/HeroSection';
 import UploadCard from '../components/UploadCard';
 import ResultCard from '../components/ResultCard';
 import GradcamViewer from '../components/GradcamViewer';
 import SampleSelector from '../components/SampleSelector';
+import ReportCard from '../components/ReportCard';
+import BrainTumorInfo from '../components/BrainTumorInfo';
 import ReportModal from '../components/ReportModal';
 import { 
   analyzeImage, 
@@ -23,7 +19,6 @@ import {
   toDataUrl 
 } from '../lib/api';
 import { PredictionResponse, GradcamResponse, SampleItem, HistoryItem } from '../lib/types';
-
 
 export default function AnalyzePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -104,7 +99,6 @@ export default function AnalyzePage() {
         const stored = localStorage.getItem('neuroscan_history');
         const historyList: HistoryItem[] = stored ? JSON.parse(stored) : [];
         historyList.unshift(historyItem);
-        // Keep max 20 session items
         localStorage.setItem('neuroscan_history', JSON.stringify(historyList.slice(0, 20)));
       } catch (err) {
         console.error('Failed to update session history:', err);
@@ -177,93 +171,38 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      
+      {/* 1. Clinical Research Notice */}
+      <DisclaimerBanner />
 
+      {/* 2. Hero Section & Feature Strip */}
+      <HeroSection
+        onUploadClick={() => workspaceRef.current?.scrollIntoView({ behavior: 'smooth' })}
+        onExampleClick={() => examplesRef.current?.scrollIntoView({ behavior: 'smooth' })}
+      />
 
-      {/* Hero Section */}
-      <section className="text-center py-6 sm:py-10 max-w-3xl mx-auto space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-400 text-xs font-semibold uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>BRAIN MRI ANALYSIS</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-          Advanced AI for <br className="hidden sm:inline" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-blue-600 dark:from-sky-400 dark:to-blue-400">
-            Better Brain Health
-          </span>
-        </h1>
-
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-          Upload a brain MRI scan and receive AI-assisted classification across four categories:
-          <strong className="text-slate-800 dark:text-slate-100 font-semibold"> No Tumor</strong>,
-          <strong className="text-slate-800 dark:text-slate-100 font-semibold"> Glioma Tumor</strong>,
-          <strong className="text-slate-800 dark:text-slate-100 font-semibold"> Meningioma Tumor</strong>, and
-          <strong className="text-slate-800 dark:text-slate-100 font-semibold"> Pituitary Tumor</strong>.
-        </p>
-
-        {/* CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          <button
-            onClick={() => workspaceRef.current?.scrollIntoView({ behavior: 'smooth' })}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-sm shadow-sky-600/20 transition-colors cursor-pointer"
-          >
-            <Upload className="w-4 h-4" />
-            <span>Upload MRI Scan</span>
-          </button>
-          <button
-            onClick={() => examplesRef.current?.scrollIntoView({ behavior: 'smooth' })}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
-          >
-            <ArrowDown className="w-4 h-4" />
-            <span>Try an Example</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Feature Highlights Row */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl mx-auto">
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs">
-          <div className="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400">
-            <Cpu className="w-4 h-4" />
-          </div>
-          <span className="font-medium">AI-Powered Analysis</span>
-        </div>
-
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs">
-          <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400">
-            <Eye className="w-4 h-4" />
-          </div>
-          <span className="font-medium">Explainable AI</span>
-        </div>
-
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs">
-          <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400">
-            <Microscope className="w-4 h-4" />
-          </div>
-          <span className="font-medium">Research Focused</span>
-        </div>
-
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs">
-          <div className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
-            <HeartHandshake className="w-4 h-4" />
-          </div>
-          <span className="font-medium">Towards Better Brain Health</span>
-        </div>
-      </section>
-
-      {/* Error alert if any */}
+      {/* Dismissible Error Alert */}
       {errorMessage && (
-        <div className="max-w-5xl mx-auto p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200 text-sm">
-          <strong>Analysis Error: </strong> {errorMessage}
+        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200 text-sm flex items-center justify-between shadow-2xs">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
+            <span><strong>Analysis Error:</strong> {errorMessage}</span>
+          </div>
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="p-1 rounded-md text-rose-500 hover:text-rose-800 dark:hover:text-rose-200 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
-      {/* Main 3-Part Clinical Workspace */}
-      <section ref={workspaceRef} className="max-w-7xl mx-auto pt-4">
+      {/* 3. Three-Step Analysis Workspace */}
+      <section ref={workspaceRef} className="pt-2">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           
-          {/* 1. Upload Card */}
+          {/* Step 1: Upload MRI Scan */}
           <UploadCard
             selectedFile={selectedFile}
             previewUrl={previewUrl}
@@ -273,14 +212,14 @@ export default function AnalyzePage() {
             onAnalyze={() => handleAnalyze()}
           />
 
-          {/* 2. Analysis Result Card */}
+          {/* Step 2: AI Analysis Result */}
           <ResultCard
             prediction={prediction}
             isLoading={isAnalyzing}
             onOpenReport={() => setIsReportOpen(true)}
           />
 
-          {/* 3. Grad-CAM Card */}
+          {/* Step 3: AI Explanation (Grad-CAM) */}
           <GradcamViewer
             gradcam={gradcam}
             isLoading={isGradcamLoading}
@@ -289,14 +228,25 @@ export default function AnalyzePage() {
         </div>
       </section>
 
-      {/* Try an Example Section */}
-      <div ref={examplesRef}>
-        <SampleSelector
-          onSelectSample={handleSelectSample}
-          isLoading={isAnalyzing}
-          selectedSampleId={selectedSampleId}
-        />
+      {/* 4. Try an Example & Report Section */}
+      <div ref={examplesRef} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="lg:col-span-8">
+          <SampleSelector
+            onSelectSample={handleSelectSample}
+            isLoading={isAnalyzing}
+            selectedSampleId={selectedSampleId}
+          />
+        </div>
+        <div className="lg:col-span-4">
+          <ReportCard
+            onGenerateReport={() => setIsReportOpen(true)}
+            hasAnalysis={prediction !== null}
+          />
+        </div>
       </div>
+
+      {/* 5. Educational Brain Tumor Information */}
+      <BrainTumorInfo />
 
       {/* Report Modal */}
       <ReportModal

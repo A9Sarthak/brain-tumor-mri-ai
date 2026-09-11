@@ -8,7 +8,7 @@
   --surface-raised: #f1f5f9;
   --surface-border: #e2e8f0;
   --text-primary: #0f172a;
-  --text-secondary: #475569;
+  --text-secondary: #334155;
   --text-muted: #64748b;
   --accent-primary: #0284c7;
   --accent-hover: #0369a1;
@@ -32,7 +32,7 @@ body {
   background-color: var(--background);
   color: var(--text-primary);
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -54,4 +54,17 @@ body {
 
 .dark ::-webkit-scrollbar-thumb {
   background: #334155;
+}
+
+/* Subtle card styling */
+.clinical-card {
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  background-color: var(--surface);
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.clinical-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
 }

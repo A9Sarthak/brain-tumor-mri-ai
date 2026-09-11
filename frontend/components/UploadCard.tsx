@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { UploadCloud, FileText, X, ArrowRight, Loader2 } from 'lucide-react';
+import { UploadCloud, FileText, X, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 
 interface UploadCardProps {
   selectedFile: File | null;
@@ -31,7 +31,6 @@ export default function UploadCard({
       setErrorMsg('Unsupported format. Please upload a JPG or PNG MRI scan.');
       return;
     }
-    // 200MB max size check
     if (file.size > 200 * 1024 * 1024) {
       setErrorMsg('File exceeds 200MB size limit.');
       return;
@@ -47,17 +46,8 @@ export default function UploadCard({
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -65,19 +55,25 @@ export default function UploadCard({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden flex flex-col h-full transition-colors">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden flex flex-col h-full transition-all">
+      
       {/* Step Header */}
-      <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400 font-bold text-xs flex items-center justify-center border border-sky-200 dark:border-sky-800">
+          <div className="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
             1
           </div>
-          <h2 className="font-semibold text-slate-900 dark:text-white text-base">
-            Upload MRI Scan
-          </h2>
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-tight">
+              Upload MRI Scan
+            </h2>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+              Select or drop brain imaging scan
+            </p>
+          </div>
         </div>
-        <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-          JPG / PNG (Max 200MB)
+        <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+          JPG / PNG · Max 200MB
         </span>
       </div>
 
@@ -86,25 +82,25 @@ export default function UploadCard({
         {!previewUrl ? (
           <div
             onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
+            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+            onDragLeave={() => setIsDragOver(false)}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[260px] ${
+            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[260px] ${
               isDragOver
-                ? 'border-sky-500 bg-sky-50/50 dark:bg-sky-950/20'
-                : 'border-slate-300 dark:border-slate-700 hover:border-sky-400 hover:bg-slate-50/50 dark:hover:bg-slate-800/40'
+                ? 'border-sky-500 bg-sky-50/80 dark:bg-sky-950/40'
+                : 'border-sky-200/80 dark:border-slate-700 bg-sky-50/30 dark:bg-slate-800/30 hover:border-sky-400 hover:bg-sky-50/60 dark:hover:bg-slate-800/50'
             }`}
           >
-            <div className="w-14 h-14 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-3">
-              <UploadCloud className="w-7 h-7" />
+            <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-3 shadow-2xs border border-sky-100 dark:border-slate-700">
+              <UploadCloud className="w-6 h-6" />
             </div>
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-              Drag & drop an MRI image here
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-0.5">
+              Drag &amp; drop an MRI image here
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
               or click to browse from local workstation
             </p>
-            <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 shadow-2xs">
+            <span className="inline-flex items-center px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-slate-700 shadow-2xs hover:bg-sky-50 transition-colors">
               Select MRI File
             </span>
             <input
@@ -120,9 +116,9 @@ export default function UploadCard({
             />
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3.5">
             {/* Image Preview Box */}
-            <div className="relative w-full aspect-square max-h-[280px] bg-black/90 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center">
+            <div className="relative w-full aspect-square max-h-[260px] bg-black/95 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
@@ -132,11 +128,16 @@ export default function UploadCard({
               <button
                 onClick={onRemove}
                 disabled={isLoading}
-                aria-label="Remove uploaded scan"
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white transition-colors cursor-pointer"
+                aria-label="Remove scan"
+                className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
+              
+              <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/75 rounded text-[10px] text-emerald-400 font-medium flex items-center gap-1 backdrop-blur-xs">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>Ready for analysis</span>
+              </div>
             </div>
 
             {/* File Details */}
@@ -165,12 +166,12 @@ export default function UploadCard({
         )}
 
         {/* Action Controls */}
-        <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
           {previewUrl && (
             <button
               onClick={onRemove}
               disabled={isLoading}
-              className="px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+              className="px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
             >
               Remove
             </button>
@@ -179,9 +180,9 @@ export default function UploadCard({
           <button
             onClick={onAnalyze}
             disabled={(!selectedFile && !previewUrl) || isLoading}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer shadow-xs ${
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer shadow-xs ${
               (!selectedFile && !previewUrl) || isLoading
-                ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-200 dark:border-slate-700'
                 : 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-sky-600/20'
             }`}
           >
@@ -198,6 +199,7 @@ export default function UploadCard({
             )}
           </button>
         </div>
+
       </div>
     </div>
   );
