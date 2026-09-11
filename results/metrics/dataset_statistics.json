@@ -1,0 +1,38 @@
+{
+  "total_images_discovered": 7200,
+  "valid_images_total": 7200,
+  "invalid_or_corrupt_count": 0,
+  "excluded_details": [],
+  "train_count": 4767,
+  "validation_count": 833,
+  "test_count": 1600,
+  "class_distribution": {
+    "train": {
+      "notumor": 1194,
+      "pituitary": 1193,
+      "glioma": 1190,
+      "meningioma": 1190
+    },
+    "val": {
+      "glioma": 210,
+      "meningioma": 210,
+      "pituitary": 207,
+      "notumor": 206
+    },
+    "test": {
+      "glioma": 400,
+      "meningioma": 400,
+      "notumor": 400,
+      "pituitary": 400
+    }
+  },
+  "formats_present": [
+    "JPG"
+  ],
+  "class_weights": {
+    "0": 1.0014705882352941,
+    "1": 1.0014705882352941,
+    "2": 0.9981155778894473,
+    "3": 0.9989522212908634
+  }
+}

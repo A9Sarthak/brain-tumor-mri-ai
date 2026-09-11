@@ -1,0 +1,54 @@
+{
+  "pipeline_mode": "full_experiment",
+  "model_name": "ResNet50_Brain_Tumor_Classifier",
+  "epochs_trained": 3,
+  "best_epoch": 1,
+  "best_val_loss": 1.5242005586624146,
+  "best_val_accuracy": 0.4093637466430664,
+  "duration_seconds": 419.18,
+  "duration_formatted": "6m 59s",
+  "saved_model_path": "C:\\Users\\darsh\\OneDrive\\Desktop\\AI Project\\models\\resnet50_best.keras",
+  "hyperparameters": {
+    "batch_size": 64,
+    "initial_learning_rate": 0.0001,
+    "max_epochs": 3,
+    "optimizer": "Adam",
+    "loss": "sparse_categorical_crossentropy"
+  },
+  "history": {
+    "accuracy": [
+      0.5110132098197937,
+      0.4996853470802307,
+      0.5284245610237122
+    ],
+    "loss": [
+      1.3653820753097534,
+      1.3552663326263428,
+      1.199168086051941
+    ],
+    "val_accuracy": [
+      0.4093637466430664,
+      0.3577430844306946,
+      0.35534214973449707
+    ],
+    "val_loss": [
+      1.5242005586624146,
+      1.88352370262146,
+      2.1513023376464844
+    ],
+    "learning_rate": [
+      9.999999747378752e-05,
+      9.999999747378752e-05,
+      9.999999747378752e-05
+    ]
+  },
+  "hardware": {
+    "physical_devices": [
+      "/physical_device:CPU:0"
+    ],
+    "gpu_available": false,
+    "gpu_count": 0,
+    "primary_device": "CPU",
+    "tf_version": "2.21.0"
+  }
+}

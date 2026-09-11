@@ -1,0 +1,44 @@
+﻿# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter & IDE
+.ipynb_checkpoints
+.vscode/
+.idea/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Raw and Processed Large Datasets (Strictly excluded)
+data/raw/
+data/*.zip
+data/*.tar.gz
+data/*.tar
+
+# Model Checkpoints (Heavy binary files > 50MB)
+models/*.h5
+models/*.keras
+!models/.gitkeep
+
+# Logs & Temporary Files
+*.log
+scratch/
+tmp/
+temp/
+
+# Environment Variables & Credentials
+.env
+.env.*
+secrets.json
