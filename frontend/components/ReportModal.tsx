@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { X, Printer, Copy, Check, ShieldAlert } from 'lucide-react';
 import { PredictionResponse, GradcamResponse } from '../lib/types';
-import { generateReport } from '../lib/api';
+import { generateReport, toDataUrl } from '../lib/api';
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -128,7 +128,7 @@ export default function ReportModal({
                 <div className="aspect-square bg-black rounded overflow-hidden flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`data:image/png;base64,${gradcam.original_image_base64}`}
+                    src={toDataUrl(gradcam.original_image_base64)}
                     alt="Original MRI"
                     className="w-full h-full object-contain"
                   />
@@ -141,7 +141,7 @@ export default function ReportModal({
                 <div className="aspect-square bg-black rounded overflow-hidden flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`data:image/png;base64,${gradcam.overlay_image_base64}`}
+                    src={toDataUrl(gradcam.overlay_image_base64)}
                     alt="Grad-CAM Overlay"
                     className="w-full h-full object-contain"
                   />

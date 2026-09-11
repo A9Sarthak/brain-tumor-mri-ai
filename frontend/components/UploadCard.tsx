@@ -148,9 +148,11 @@ export default function UploadCard({
                     {selectedFile.name}
                   </span>
                 </div>
-                <span className="text-slate-500 dark:text-slate-400 shrink-0 ml-2 font-mono">
-                  {formatFileSize(selectedFile.size)}
-                </span>
+                {selectedFile.size > 0 && (
+                  <span className="text-slate-500 dark:text-slate-400 shrink-0 ml-2 font-mono">
+                    {formatFileSize(selectedFile.size)}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -176,9 +178,9 @@ export default function UploadCard({
 
           <button
             onClick={onAnalyze}
-            disabled={!selectedFile || isLoading}
+            disabled={(!selectedFile && !previewUrl) || isLoading}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer shadow-xs ${
-              !selectedFile || isLoading
+              (!selectedFile && !previewUrl) || isLoading
                 ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
                 : 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-sky-600/20'
             }`}

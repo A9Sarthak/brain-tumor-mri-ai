@@ -4,6 +4,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from backend.schemas.analysis import PredictionResponse, GradcamResponse
 from backend.services.model_service import ModelService
 from backend.services.gradcam_service import GradcamService
+from backend.routes.samples import resolve_sample_file
 
 router = APIRouter(prefix="/api", tags=["analyze"])
 
@@ -30,15 +31,9 @@ async def analyze_mri(
         if len(contents) > MAX_FILE_SIZE_BYTES:
             raise HTTPException(status_code=400, detail="File exceeds maximum allowed size of 200MB.")
     else:
-        # Load sample from disk
-        from src.config import TEST_MANIFEST
-        import pandas as pd
-        df = pd.read_csv(TEST_MANIFEST)
-        sample_rows = df[df["class_name"] == sample_class.lower()]
-        if sample_rows.empty:
-            raise HTTPException(status_code=404, detail=f"Sample for class '{sample_class}' not found.")
-        filepath = sample_rows.iloc[0]["filepath"]
-        with open(filepath, "rb") as f:
+        # Load sample from disk using verified sample repository
+        sample_path = resolve_sample_file(sample_class)
+        with open(sample_path, "rb") as f:
             contents = f.read()
 
     try:
@@ -72,14 +67,8 @@ async def generate_gradcam(
     if file:
         contents = await file.read()
     else:
-        from src.config import TEST_MANIFEST
-        import pandas as pd
-        df = pd.read_csv(TEST_MANIFEST)
-        sample_rows = df[df["class_name"] == sample_class.lower()]
-        if sample_rows.empty:
-            raise HTTPException(status_code=404, detail=f"Sample for class '{sample_class}' not found.")
-        filepath = sample_rows.iloc[0]["filepath"]
-        with open(filepath, "rb") as f:
+        sample_path = resolve_sample_file(sample_class)
+        with open(sample_path, "rb") as f:
             contents = f.read()
 
     try:

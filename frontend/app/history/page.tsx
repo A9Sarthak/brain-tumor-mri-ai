@@ -11,6 +11,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { HistoryItem } from '../../lib/types';
+import { toDataUrl } from '../../lib/api';
 import DisclaimerBanner from '../../components/DisclaimerBanner';
 import ReportModal from '../../components/ReportModal';
 
@@ -92,7 +93,7 @@ export default function HistoryPage() {
                 <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={item.thumbnail}
+                    src={toDataUrl(item.thumbnail)}
                     alt={item.prediction}
                     className="w-full h-full object-contain"
                   />

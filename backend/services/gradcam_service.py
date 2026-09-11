@@ -21,7 +21,7 @@ class GradcamService:
         buf = io.BytesIO()
         pil_img.save(buf, format="PNG")
         b64_str = base64.b64encode(buf.getvalue()).decode("utf-8")
-        return f"data:image/png;base64,{b64_str}"
+        return b64_str
 
     def generate_visualizations(
         self,

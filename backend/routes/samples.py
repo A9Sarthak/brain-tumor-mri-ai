@@ -51,20 +51,23 @@ def get_sample_mris():
         for item in SAMPLE_DEFINITIONS
     ]
 
+def resolve_sample_file(identifier: str) -> Path:
+    ident = identifier.lower().replace(" ", "").replace("_", "").replace("-", "")
+    for s in SAMPLE_DEFINITIONS:
+        s_id = s["id"].lower().replace(" ", "").replace("_", "").replace("-", "")
+        s_cls = s["class_name"].lower().replace(" ", "").replace("_", "").replace("-", "")
+        s_disp = s["display_name"].lower().replace(" ", "").replace("_", "").replace("-", "")
+        if ident in (s_id, s_cls, s_disp) or s_id in ident or s_cls in ident:
+            if s["src_path"].exists():
+                return s["src_path"]
+            static_path = Path(__file__).resolve().parent.parent / "static" / "samples" / s["filename"]
+            if static_path.exists():
+                return static_path
+    raise HTTPException(status_code=404, detail=f"Sample '{identifier}' not found.")
+
 @router.get("/samples/{sample_id}/image")
 def get_sample_image(sample_id: str):
-    matched = next((s for s in SAMPLE_DEFINITIONS if s["id"] == sample_id.lower()), None)
-    if not matched:
-        raise HTTPException(status_code=404, detail=f"Sample '{sample_id}' not found")
-    
-    file_path = matched["src_path"]
-    if not file_path.exists():
-        # Fallback to static folder
-        static_path = Path(__file__).resolve().parent.parent / "static" / "samples" / matched["filename"]
-        if static_path.exists():
-            file_path = static_path
-        else:
-            raise HTTPException(status_code=404, detail=f"Sample file {matched['filename']} not found on disk")
-    
+    file_path = resolve_sample_file(sample_id)
     return FileResponse(str(file_path), media_type="image/jpeg")
+
 

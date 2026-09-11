@@ -16,8 +16,15 @@ import GradcamViewer from '../components/GradcamViewer';
 import SampleSelector from '../components/SampleSelector';
 import ReportModal from '../components/ReportModal';
 import DisclaimerBanner from '../components/DisclaimerBanner';
-import { analyzeImage, getGradcam, fetchSampleAsFile } from '../lib/api';
+import { 
+  analyzeImage, 
+  analyzeSample, 
+  getGradcam, 
+  getGradcamForSample, 
+  toDataUrl 
+} from '../lib/api';
 import { PredictionResponse, GradcamResponse, SampleItem, HistoryItem } from '../lib/types';
+
 
 export default function AnalyzePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -80,7 +87,7 @@ export default function AnalyzePage() {
         prediction: predResult.prediction,
         confidence: predResult.confidence,
         timestamp: new Date().toISOString(),
-        thumbnail: previewUrl || `data:image/png;base64,${gradcamResult.original_image_base64}`,
+        thumbnail: previewUrl || toDataUrl(gradcamResult.original_image_base64),
         probabilities: predResult.probabilities,
         gradcam: gradcamResult,
       };
@@ -108,22 +115,52 @@ export default function AnalyzePage() {
     setErrorMessage(null);
     setPrediction(null);
     setGradcam(null);
+    setPreviewUrl(sample.image_url);
+    setSelectedFile(new File([], sample.filename, { type: 'image/jpeg' }));
+
+    // Scroll smoothly to workspace
+    workspaceRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+    setIsAnalyzing(true);
+    setIsGradcamLoading(true);
 
     try {
-      const file = await fetchSampleAsFile(sample);
-      setSelectedFile(file);
-      setPreviewUrl(sample.image_url);
+      // 1. Run real EfficientNet-B0 inference on the sample directly
+      const predResult = await analyzeSample(sample.id);
+      setPrediction(predResult);
 
-      // Scroll smoothly to workspace
-      workspaceRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // 2. Run real Grad-CAM generation for the sample
+      const gradcamResult = await getGradcamForSample(sample.id);
+      setGradcam(gradcamResult);
 
-      // Automatically trigger real analysis and Grad-CAM
-      await handleAnalyze(file);
+      // 3. Save to session-only history in localStorage
+      const historyItem: HistoryItem = {
+        id: predResult.analysis_id,
+        prediction: predResult.prediction,
+        confidence: predResult.confidence,
+        timestamp: new Date().toISOString(),
+        thumbnail: sample.image_url || toDataUrl(gradcamResult.original_image_base64),
+        probabilities: predResult.probabilities,
+        gradcam: gradcamResult,
+      };
+
+      try {
+        const stored = localStorage.getItem('neuroscan_history');
+        const historyList: HistoryItem[] = stored ? JSON.parse(stored) : [];
+        historyList.unshift(historyItem);
+        localStorage.setItem('neuroscan_history', JSON.stringify(historyList.slice(0, 20)));
+      } catch (err) {
+        console.error('Failed to update session history:', err);
+      }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to load sample image.';
+      const msg = err instanceof Error ? err.message : 'Failed to analyze sample image.';
       setErrorMessage(msg);
+    } finally {
+      setIsAnalyzing(false);
+      setIsGradcamLoading(false);
     }
   };
+
 
   return (
     <div className="space-y-8">

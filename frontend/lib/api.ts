@@ -6,7 +6,17 @@ import {
   ReportResponse 
 } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000';
+// In browser, use empty string to route through Next.js proxy rewrites (/api/*).
+// In SSR or when explicit env is set, use the provided or default backend URL.
+const API_BASE_URL = typeof window !== 'undefined'
+  ? (process.env.NEXT_PUBLIC_API_BASE_URL || '')
+  : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000');
+
+export function toDataUrl(base64OrDataUrl: string): string {
+  if (!base64OrDataUrl) return '';
+  if (base64OrDataUrl.startsWith('data:image/')) return base64OrDataUrl;
+  return `data:image/png;base64,${base64OrDataUrl}`;
+}
 
 export async function checkHealth(): Promise<{
   status: string;
@@ -40,6 +50,23 @@ export async function analyzeImage(file: File): Promise<PredictionResponse> {
   return res.json();
 }
 
+export async function analyzeSample(sampleClassOrId: string): Promise<PredictionResponse> {
+  const formData = new FormData();
+  formData.append('sample_class', sampleClassOrId);
+
+  const res = await fetch(`${API_BASE_URL}/api/analyze`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ detail: 'Failed to analyze sample scan' }));
+    throw new Error(errorData.detail || `Sample analysis failed: ${res.statusText}`);
+  }
+
+  return res.json();
+}
+
 export async function getGradcam(file: File, targetClassIdx?: number): Promise<GradcamResponse> {
   const formData = new FormData();
   formData.append('file', file);
@@ -62,6 +89,23 @@ export async function getGradcam(file: File, targetClassIdx?: number): Promise<G
   return res.json();
 }
 
+export async function getGradcamForSample(sampleClassOrId: string): Promise<GradcamResponse> {
+  const formData = new FormData();
+  formData.append('sample_class', sampleClassOrId);
+
+  const res = await fetch(`${API_BASE_URL}/api/gradcam`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ detail: 'Failed to generate sample Grad-CAM' }));
+    throw new Error(errorData.detail || `Sample Grad-CAM failed: ${res.statusText}`);
+  }
+
+  return res.json();
+}
+
 export async function getPerformance(): Promise<PerformanceResponse> {
   const res = await fetch(`${API_BASE_URL}/api/performance`);
   if (!res.ok) {
@@ -76,7 +120,7 @@ export async function getSamples(): Promise<SampleItem[]> {
     throw new Error(`Failed to fetch sample scans: ${res.statusText}`);
   }
   const samples: SampleItem[] = await res.json();
-  // Ensure image_url is absolute if relative
+  // Ensure image_url is formatted with API_BASE_URL if needed
   return samples.map(s => ({
     ...s,
     image_url: s.image_url.startsWith('http') ? s.image_url : `${API_BASE_URL}${s.image_url}`
@@ -84,7 +128,11 @@ export async function getSamples(): Promise<SampleItem[]> {
 }
 
 export async function fetchSampleAsFile(sample: SampleItem): Promise<File> {
-  const res = await fetch(sample.image_url);
+  const targetUrl = sample.image_url.startsWith('http') 
+    ? sample.image_url 
+    : `${API_BASE_URL}${sample.image_url}`;
+  
+  const res = await fetch(targetUrl);
   if (!res.ok) {
     throw new Error(`Failed to download sample image: ${res.statusText}`);
   }

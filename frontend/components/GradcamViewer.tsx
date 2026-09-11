@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Eye, Info, Layers, Loader2 } from 'lucide-react';
 import { GradcamResponse } from '../lib/types';
+import { toDataUrl } from '../lib/api';
 
 interface GradcamViewerProps {
   gradcam: GradcamResponse | null;
@@ -19,12 +20,12 @@ export default function GradcamViewer({ gradcam, isLoading }: GradcamViewerProps
     if (!gradcam) return null;
     switch (activeTab) {
       case 'original':
-        return `data:image/png;base64,${gradcam.original_image_base64}`;
+        return toDataUrl(gradcam.original_image_base64);
       case 'attention':
-        return `data:image/png;base64,${gradcam.attention_heatmap_base64}`;
+        return toDataUrl(gradcam.attention_heatmap_base64);
       case 'overlay':
       default:
-        return `data:image/png;base64,${gradcam.overlay_image_base64}`;
+        return toDataUrl(gradcam.overlay_image_base64);
     }
   };
 
