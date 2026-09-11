@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, ArrowRight, Layers, ShieldAlert } from 'lucide-react';
+import { BookOpen, ArrowRight } from 'lucide-react';
 
 type TumorTab = 'pituitary' | 'glioma' | 'meningioma' | 'notumor';
 
@@ -121,54 +121,32 @@ export default function BrainTumorInfo() {
       </div>
 
       {/* Tab Content Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div className="md:col-span-2 space-y-4">
-          <div>
-            <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-sky-600 dark:text-sky-400">
-              {current.category}
-            </span>
-            <h4 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-              {current.title}
-            </h4>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-2">
-              {current.description}
-            </p>
-          </div>
-
-          <div className="space-y-1.5 pt-1">
-            <span className="text-xs font-bold text-slate-900 dark:text-white block">
-              Pathological Key Points:
-            </span>
-            <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
-              {current.characteristics.map((c, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0 mt-1.5" />
-                  <span>{c}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+      <div className="space-y-4">
+        <div>
+          <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-sky-600 dark:text-sky-400">
+            {current.category}
+          </span>
+          <h4 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+            {current.title}
+          </h4>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-2">
+            {current.description}
+          </p>
         </div>
 
-        {/* MRI Features Box */}
-        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-850/60 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white mb-2">
-              <Layers className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-              <span>Diagnostic MRI Hallmarks</span>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {current.mriFindings}
-            </p>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800 flex items-center gap-2 text-[11px] text-amber-700 dark:text-amber-300">
-            <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-            <span>Research context only; not diagnostic criteria.</span>
-          </div>
+        <div className="space-y-1.5 pt-1">
+          <span className="text-xs font-bold text-slate-900 dark:text-white block">
+            Pathological Key Points:
+          </span>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 pt-1">
+            {current.characteristics.map((c, i) => (
+              <li key={i} className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0 mt-1.5" />
+                <span>{c}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-
       </div>
 
     </section>
