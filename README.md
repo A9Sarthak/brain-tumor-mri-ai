@@ -98,19 +98,37 @@ The authoritative class indexing is locked to:
 - Python 3.10 or 3.11
 - Node.js 18+ and npm
 
-### 1. Start the FastAPI Backend
+## 4. Quick Start Guide
+
+### Option A: One-Click Launcher (Easiest)
+Simply double-click **`start.bat`** in the project root.
+- Automatically launches the FastAPI backend in a separate window.
+- Automatically launches the Next.js frontend in a separate window.
+- Automatically opens **`http://localhost:3000`** in your default web browser!
+
+---
+
+### Option B: Separate Launch Scripts
+- **Start Backend**: Double-click `start_backend.bat` (serves API on `http://127.0.0.1:8000`)
+- **Start Frontend**: Double-click `start_frontend.bat` (serves UI on `http://localhost:3000`)
+
+---
+
+### Option C: Manual Command Line
+
+#### 1. Start the FastAPI Backend
 ```bash
-# In the project root with the virtual environment activated:
-.venv\Scripts\activate
-uvicorn backend.main:app --host 127.0.0.1 --port 8000
+# In the project root with the virtual environment:
+.venv\Scripts\uvicorn.exe backend.main:app --host 127.0.0.1 --port 8000
 ```
 Backend will be available at: `http://127.0.0.1:8000` (API documentation at `http://127.0.0.1:8000/docs`).
 
-### 2. Start the Next.js Frontend
+#### 2. Start the Next.js Frontend
 ```bash
 cd frontend
-npm install
-npm run dev
+cmd.exe /c "set PATH=C:\Users\darsh\node-v20.18.0-win-x64;%PATH% && npm run start -- -p 3000"
+# Or in dev mode:
+cmd.exe /c "set PATH=C:\Users\darsh\node-v20.18.0-win-x64;%PATH% && npm run dev"
 ```
 Frontend will be available at: `http://localhost:3000`.
 
