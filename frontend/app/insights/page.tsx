@@ -10,8 +10,7 @@ import {
   HelpCircle,
   Loader2,
   FileCheck,
-  ShieldCheck,
-  AlertOctagon
+  ShieldCheck
 } from 'lucide-react';
 import { getPerformance } from '../../lib/api';
 import { PerformanceResponse } from '../../lib/types';
@@ -239,55 +238,31 @@ export default function InsightsPage() {
 
       </div>
 
-      {/* Input Quality & OOD Detection Methodology */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Input Quality Section */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
-              Input Quality
-            </h2>
+      {/* Input Quality Methodology */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
+            Input Quality
+          </h2>
+        </div>
+        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          Non-destructive technical inspection layer evaluating scan decodability, minimum pixel dimensions (&ge; 32x32 px), extreme aspect ratios, dynamic range, RMS contrast (&ge; 0.08), exposure limits, and Laplacian variance sharpness (&ge; 15.0).
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Min Resolution</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">&ge; 150x150 px</span>
           </div>
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            Non-destructive technical inspection layer evaluating scan decodability, minimum pixel dimensions (&ge; 32x32 px), extreme aspect ratios, dynamic range, RMS contrast (&ge; 0.08), exposure limits, and Laplacian variance sharpness (&ge; 15.0).
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Min Resolution</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">&ge; 150x150 px</span>
-            </div>
-            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Contrast Threshold</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">RMS &ge; 0.10</span>
-            </div>
-            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Sharpness Metric</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">&sigma;&sup2; Laplacian</span>
-            </div>
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Contrast Threshold</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">RMS &ge; 0.10</span>
+          </div>
+          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Sharpness Metric</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">&sigma;&sup2; Laplacian</span>
           </div>
         </div>
-
-        {/* OOD Detection Section */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
-          <div className="flex items-center gap-2">
-            <AlertOctagon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
-              OOD Detection
-            </h2>
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            Lightweight statistical distribution monitor testing spectral monochromatic consistency, air background border ratios, brain skull tissue centering, and prediction entropy to flag non-brain MRI inputs (photographs, documents, screenshots).
-          </p>
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-              Benchmark OOD Dataset Status:
-            </span>
-            Evaluation dataset not configured. Conservative heuristic thresholds deployed without retraining or modifying the baseline model.
-          </div>
-        </div>
-
       </div>
 
     </div>
