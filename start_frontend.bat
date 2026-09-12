@@ -20,7 +20,7 @@ if %errorlevel% neq 0 (
     ) else if exist "%USERPROFILE%\node-v20.18.0-win-x64" (
         set "PATH=%USERPROFILE%\node-v20.18.0-win-x64;%PATH%"
     ) else (
-        echo [ERROR] Node.js not found! Please install Node.js (v18+) from https://nodejs.org/
+        echo [ERROR] Node.js not found! Please install Node.js v18 or later from https://nodejs.org/
         pause
         exit /b 1
     )

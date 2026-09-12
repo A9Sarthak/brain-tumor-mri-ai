@@ -101,7 +101,7 @@ if %errorlevel% neq 0 (
 where node >nul 2>nul
 if %errorlevel% neq 0 (
     echo [ERROR] Node.js was not found!
-    echo Please install Node.js (v18 or v20 LTS) from:
+    echo Please install Node.js v18 or v20 LTS from:
     echo   https://nodejs.org/
     echo Once installed, rerun setup.bat.
     echo.
