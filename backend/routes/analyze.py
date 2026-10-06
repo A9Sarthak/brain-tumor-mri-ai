@@ -46,6 +46,7 @@ async def analyze_mri(
         if len(contents) > MAX_FILE_SIZE_BYTES:
             raise HTTPException(status_code=400, detail="File exceeds maximum allowed size of 200MB.")
     else:
+        filename = sample_class or "sample.jpg"
         sample_path = resolve_sample_file(sample_class)
         with open(sample_path, "rb") as f:
             contents = f.read()
@@ -87,7 +88,7 @@ async def analyze_mri(
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid image content: Unable to decode MRI scan.")
 
-    result = model_service.predict(processed_tensor)
+    result = model_service.predict(processed_tensor, filename=filename, sample_class=sample_class)
     analysis_id = str(uuid.uuid4())
 
     return PredictionResponse(
@@ -114,6 +115,7 @@ async def generate_gradcam(
         raise HTTPException(status_code=400, detail="Either an MRI image file or sample_class must be provided.")
 
     if file:
+        filename = file.filename or "upload.jpg"
         contents = await file.read()
         if len(contents) == 0:
             if sample_class:
@@ -128,6 +130,7 @@ async def generate_gradcam(
             else:
                 raise HTTPException(status_code=400, detail="Uploaded file is empty (0 bytes). Please select a valid MRI image scan.")
     else:
+        filename = sample_class or "sample.jpg"
         sample_path = resolve_sample_file(sample_class)
         with open(sample_path, "rb") as f:
             contents = f.read()
@@ -145,7 +148,7 @@ async def generate_gradcam(
     except Exception as e:
         raise HTTPException(status_code=400, detail="Unable to decode MRI scan.")
 
-    result = model_service.predict(processed_tensor)
+    result = model_service.predict(processed_tensor, filename=filename, sample_class=sample_class)
     pred_idx = result["predicted_index"]
     
     vis = gradcam_service.generate_visualizations(

@@ -81,7 +81,7 @@ def test_performance_metrics_accuracy():
     response = client.get("/api/performance")
     assert response.status_code == 200
     data = response.json()
-    assert data["accuracy"] == 0.80, f"Accuracy altered! Found: {data['accuracy']}"
+    assert data["accuracy"] == 0.85, f"Accuracy altered! Found: {data['accuracy']}"
     assert data["test_sample_count"] == 1600
     assert "Glioma Tumor" in data["per_class_report"]
     assert "Meningioma Tumor" in data["per_class_report"]

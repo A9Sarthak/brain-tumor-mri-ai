@@ -1,4 +1,4 @@
-﻿# Virtual Environments
+# Virtual Environments
 .venv/
 venv/
 ENV/
@@ -37,6 +37,16 @@ models/*.keras
 scratch/
 tmp/
 temp/
+.pytest_cache/
+
+# Frontend & Node
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+out/
+build/
+dist/
 
 # Environment Variables & Credentials
 .env

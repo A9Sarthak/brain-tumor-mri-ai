@@ -21,7 +21,7 @@ CONFUSION_MATRICES_DIR = RESULTS_DIR / "confusion_matrices"
 LOGS_DIR = RESULTS_DIR / "logs"
 
 MODELS_DIR = PROJECT_ROOT / "models"
-BEST_MODEL_PATH = MODELS_DIR / "resnet50_best.keras"
+BEST_MODEL_PATH = MODELS_DIR / "best_efficientnet_model.keras"
 
 # Multi-Model Checkpoints
 MODEL_PATHS = {

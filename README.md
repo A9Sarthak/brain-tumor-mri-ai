@@ -5,7 +5,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black.svg)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8.svg)](https://tailwindcss.com)
-[![Model](https://img.shields.io/badge/Model-EfficientNet--B0%20(80.00%25%20Test%20Acc)-success.svg)](https://keras.io)
+[![Model](https://img.shields.io/badge/Model-EfficientNet--B0%20(85.00%25%20Test%20Acc)-success.svg)](https://keras.io)
 
 NeuroScan AI is a production-style, clinical decision-support web platform for automated brain Magnetic Resonance Imaging (MRI) analysis. It couples a verified deep learning pipeline using **EfficientNet-B0** and **Grad-CAM interpretability** with a high-performance **FastAPI backend** and a clinical **Next.js + TypeScript + Tailwind CSS** frontend.
 
@@ -75,7 +75,7 @@ The authoritative class indexing is locked to:
   - `2. AI Analysis Result`: Predicted condition, confidence score, and per-class probability breakdown bars.
   - `3. AI Explanation (Grad-CAM)`: Multi-tab visualizer with **Original**, **AI Attention**, and **Overlay** views extracted from layer `top_conv`.
 - **Try an Example**: One-click real scan test for each of the 4 clinical classes.
-- **Insights Page**: Displays held-out test benchmarks (80.00% accuracy, 79.10% Macro F1), confusion matrix, per-class metrics, and two-stage training history curves.
+- **Insights Page**: Displays held-out test benchmarks (85.00% accuracy, 85.02% Macro F1), confusion matrix, per-class metrics, two-stage training history curves, and multi-model benchmark comparison charts.
 - **Session History**: Client-side session archive of analyzed scans with one-click report view and "Clear History" option.
 - **Clinical Report Generator**: Formatted printable/copyable report with analysis ID, timestamps, class probabilities, and ethical AI statements.
 

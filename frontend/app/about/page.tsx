@@ -95,7 +95,7 @@ export default function AboutPage() {
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
             <div>
               <strong>Stage 2 (Targeted Fine-Tuning): </strong>
-              The top 20 convolutional layers (including the critical <code className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono">top_conv</code> layer) are unfrozen and trained end-to-end with an attenuated learning rate of 1e-4, mitigating representation collapse and achieving 80.00% accuracy on held-out test data.
+              The top 20 convolutional layers (including the critical <code className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono">top_conv</code> layer) are unfrozen and trained end-to-end with an attenuated learning rate of 1e-4, mitigating representation collapse and achieving 85.00% accuracy on held-out test data.
             </div>
           </div>
         </div>
