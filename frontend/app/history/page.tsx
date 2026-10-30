@@ -4,14 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { 
   History as HistoryIcon, 
   Trash2, 
-  Eye, 
   Calendar, 
   FileText, 
-  Layers,
-  ArrowRight
+  Layers
 } from 'lucide-react';
 import { HistoryItem } from '../../lib/types';
 import { toDataUrl } from '../../lib/api';
+import { getHistory, clearHistory } from '../../lib/storage';
 import ReportModal from '../../components/ReportModal';
 
 export default function HistoryPage() {
@@ -20,19 +19,12 @@ export default function HistoryPage() {
   const [isReportOpen, setIsReportOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('neuroscan_history');
-      if (stored) {
-        setHistory(JSON.parse(stored));
-      }
-    } catch (err) {
-      console.error('Error loading history:', err);
-    }
+    setHistory(getHistory());
   }, []);
 
   const handleClearHistory = () => {
     if (confirm('Clear all session analysis history? This action cannot be undone.')) {
-      localStorage.removeItem('neuroscan_history');
+      clearHistory();
       setHistory([]);
       setSelectedItem(null);
     }
@@ -40,8 +32,6 @@ export default function HistoryPage() {
 
   return (
     <div className="space-y-8">
-
-
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
@@ -92,7 +82,7 @@ export default function HistoryPage() {
                 <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={toDataUrl(item.thumbnail)}
+                    src={toDataUrl(item.thumbnail || item.image_preview || '')}
                     alt={item.prediction}
                     className="w-full h-full object-contain"
                   />
@@ -108,7 +98,7 @@ export default function HistoryPage() {
                       Prediction
                     </span>
                     <span className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
-                      <Calendar className="w-3 h-3" />
+                      <Calendar className="w-3.5 h-3.5" />
                       {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -122,7 +112,7 @@ export default function HistoryPage() {
                       Top Class Probabilities
                     </div>
                     <div className="space-y-1">
-                      {Object.entries(item.probabilities).map(([name, prob]) => (
+                      {Object.entries(item.probabilities || {}).map(([name, prob]) => (
                         <div key={name} className="flex justify-between text-[11px]">
                           <span className="text-slate-600 dark:text-slate-400 truncate">{name}</span>
                           <span className="font-mono text-slate-800 dark:text-slate-200">
@@ -165,7 +155,7 @@ export default function HistoryPage() {
             analysis_id: selectedItem.id,
             prediction: selectedItem.prediction,
             confidence: selectedItem.confidence,
-            probabilities: selectedItem.probabilities,
+            probabilities: selectedItem.probabilities || { [selectedItem.prediction]: selectedItem.confidence },
             predicted_index: 0,
             processing_time_ms: 0,
           }}

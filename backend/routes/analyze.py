@@ -1,12 +1,17 @@
 import uuid
 from typing import Optional
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+import tensorflow as tf
+
 from backend.schemas.analysis import PredictionResponse, GradcamResponse
 from backend.services.model_service import ModelService
 from backend.services.gradcam_service import GradcamService
+from backend.services.conformal_engine import ConformalPredictionEngine
+from backend.services.radiomics_engine import RadiomicsEngine
+from backend.services.causal_inpainter import CausalInpainterEngine
 from backend.routes.samples import resolve_sample_file
-
 from backend.services.input_validation import InputValidationService
+from src.gradcam import compute_gradcam_heatmap
 
 router = APIRouter(prefix="/api", tags=["analyze"])
 
@@ -65,7 +70,10 @@ async def analyze_mri(
             processing_time_ms=0.0,
             validation=validation,
             is_withheld=True,
-            withheld_reason=validation["reason"] or "Input image failed technical quality inspection."
+            withheld_reason=validation["reason"] or "Input image failed technical quality inspection.",
+            conformal_prediction=None,
+            radiomics=None,
+            counterfactual=None
         )
 
     # If image is out-of-distribution (photo, document, screenshot, random object)
@@ -79,17 +87,51 @@ async def analyze_mri(
             processing_time_ms=0.0,
             validation=validation,
             is_withheld=True,
-            withheld_reason="This image appears substantially different from the MRI data used by this model. A reliable classification cannot be provided."
+            withheld_reason="This image appears substantially different from the MRI data used by this model. A reliable classification cannot be provided.",
+            conformal_prediction=None,
+            radiomics=None,
+            counterfactual=None
         )
 
-    # Step 2: Accepted MRI -> Run EXACT EXISTING PREPROCESSING & EFFICIENTNET-B0
+    # Step 2: Accepted MRI -> Run Unified Preprocessing & Inference
     try:
-        processed_tensor, _ = model_service.preprocess_image_bytes(contents)
+        processed_tensor, orig_np = model_service.preprocess_image_bytes(contents)
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid image content: Unable to decode MRI scan.")
 
     result = model_service.predict(processed_tensor, filename=filename, sample_class=sample_class)
     analysis_id = str(uuid.uuid4())
+
+    # Step 3: NeuroCausal-X SOTA Augmentation Layer
+    # 3.1 Conformal Prediction Sets
+    conformal_result = ConformalPredictionEngine.evaluate(result["probabilities"])
+
+    # 3.2 Grad-CAM Saliency & Morphological Radiomics
+    gradcam_service = GradcamService(model_service.model)
+    batch_tensor = tf.expand_dims(processed_tensor, axis=0)
+    heatmap = compute_gradcam_heatmap(
+        model_service.model,
+        batch_tensor,
+        target_layer_name=gradcam_service.target_layer,
+        pred_index=result["predicted_index"]
+    )
+    radiomics_result = RadiomicsEngine.extract_biomarkers(
+        orig_np=orig_np,
+        heatmap=heatmap,
+        predicted_class=result["prediction"],
+        confidence=result["confidence"]
+    )
+    binary_mask = radiomics_result.pop("binary_mask", None)
+
+    # 3.3 Counterfactual Digital Lesion Resection & Causal Attribution
+    counterfactual_result = CausalInpainterEngine.resect_and_evaluate(
+        orig_np=orig_np,
+        binary_mask=binary_mask,
+        predicted_class=result["prediction"],
+        original_confidence=result["confidence"],
+        original_probabilities=result["probabilities"],
+        model_service=model_service
+    )
 
     return PredictionResponse(
         analysis_id=analysis_id,
@@ -100,7 +142,10 @@ async def analyze_mri(
         processing_time_ms=result["processing_time_ms"],
         validation=validation,
         is_withheld=False,
-        withheld_reason=None
+        withheld_reason=None,
+        conformal_prediction=conformal_result,
+        radiomics=radiomics_result,
+        counterfactual=counterfactual_result
     )
 
 @router.post("/gradcam", response_model=GradcamResponse)
@@ -134,7 +179,6 @@ async def generate_gradcam(
         sample_path = resolve_sample_file(sample_class)
         with open(sample_path, "rb") as f:
             contents = f.read()
-
 
     validation = InputValidationService.validate_input(contents)
     if not validation["is_acceptable"]:

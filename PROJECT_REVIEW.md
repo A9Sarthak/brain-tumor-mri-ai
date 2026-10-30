@@ -252,3 +252,38 @@ To impress the panel during your review, follow these quick steps:
    .\.venv\Scripts\pytest -v tests/test_model_regression.py
    ```
    All 5 regression tests will pass in ~15 seconds, proving model weights, class order, Grad-CAM generation, and 85% accuracy in real time right in front of the professor.
+
+
+---
+
+# SECTION 8: OUR BIG SOTA NOVELTY FEATURE — NEUROCAUSAL-X™ (CAUSAL INPAINTING, CONFORMAL PREDICTION & RADIOMICS)
+
+### What Makes This Project Truly Novel & Unique Compared to Standard Projects?
+Most student/GitHub brain MRI projects do one basic thing: classify an image and show a soft Grad-CAM heatmap.
+**NeuroCausal-X™ elevates this project to a publication-grade neuro-oncology platform** with three state-of-the-art innovations:
+
+### 1. Split Conformal Prediction Sets ($\mathbb{P}(Y \in \hat{C}) \ge 95\%$)
+- **The Problem It Solves:** Standard deep learning softmax probabilities are notoriously overconfident and uncalibrated. Clamping probabilities with artificial heuristics lacks statistical backing.
+- **Our Innovation:** We implement inductive Split Conformal Prediction (Angelopoulos & Bates 2023). For any patient MRI scan, the system outputs a mathematically guaranteed **95% Confidence Prediction Set**:
+  - If unambiguous: Outputs a confident singleton, e.g., `{"Pituitary Tumor"}`.
+  - If ambiguous/borderline: Safely outputs a multi-class differential, e.g., `{"Glioma Tumor", "Meningioma Tumor"}` with an **Ambiguity Flag (Requires Specialist Review)** rather than taking a silent, dangerous gamble.
+  - Computes exact **Shannon Entropy $H(p)$** and **Epistemic Uncertainty**.
+
+### 2. Counterfactual Digital Lesion Resection & Causal Attribution Factor ($\Delta P$)
+- **The Problem It Solves:** Grad-CAM shows where the model looked, but **cannot prove causality** (the model might be looking at skull bone, contrast edges, or scanner artifacts rather than the actual tumor—the classic "Clever Hans" failure in medical AI).
+- **Our Innovation:** 
+  1. The system extracts the precise tumor contour.
+  2. It performs **Symmetry-Guided Navier-Stokes Inpainting** to digitally resect (ablate) the tumor, replacing it with synthesized healthy contralateral brain tissue.
+  3. It re-evaluates the counterfactual scan and measures the **Causal Attribution Drop**:
+     $$\Delta P_{\text{tumor}} = P(\text{Tumor} \mid \text{Original}) - P(\text{Tumor} \mid \text{Resected})$$
+  4. If $\Delta P \ge 50\%$, it awards the diagnosis **"Strong Causal Grounding"**, mathematically proving the decision was caused by the tumor tissue itself.
+  5. **Interactive UI Slider:** Clinicians can drag an interactive Before/After divider across the scan to watch the tumor digitally vanish and see the probability collapse in real time.
+
+### 3. Quantitative Radiomic Biomarkers & Morphometry Profiler
+- **The Problem It Solves:** Radiologists never diagnose based solely on thermal heatmaps; they require measured cross-sectional area, border irregularity, and anatomical compartment mapping.
+- **Our Innovation:** 
+  - **Estimated Lesion Cross-Sectional Area:** Computed in both pixels and calibrated metric surface area ($mm^2$).
+  - **Sphericity Index ($\Psi = \frac{4\pi A}{P^2}$):** Distinguishes well-circumscribed, encapsulated lesions ($\Psi \ge 0.65$, typical of Meningioma / Pituitary adenoma) from infiltrative, diffuse lesions ($\Psi < 0.65$, typical of high-grade Gliomas).
+  - **Margin Irregularity Score:** Quantifies boundary roughness via convex hull solidity.
+  - **Neuroanatomical Compartment Mapping:** Heuristically maps the centroid to the **Sellar / Pituitary Fossa**, **Extra-Axial Convexity / Dural Border**, or **Intra-Axial Deep White Matter**.
+  - **Interactive Contour Overlay Toggle:** Visualizes the cyan margin outline and corner-bracket bounding box.

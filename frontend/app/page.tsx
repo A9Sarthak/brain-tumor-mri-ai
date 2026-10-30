@@ -11,6 +11,9 @@ import ReportCard from '../components/ReportCard';
 import BrainTumorInfo from '../components/BrainTumorInfo';
 import ReportModal from '../components/ReportModal';
 import InputValidationCard from '../components/InputValidationCard';
+import ConformalSetCard from '../components/ConformalSetCard';
+import CounterfactualSlider from '../components/CounterfactualSlider';
+import RadiomicProfileCard from '../components/RadiomicProfileCard';
 import { 
   analyzeImage, 
   analyzeSample, 
@@ -19,6 +22,7 @@ import {
   toDataUrl 
 } from '../lib/api';
 import { PredictionResponse, GradcamResponse, SampleItem, HistoryItem } from '../lib/types';
+import { saveHistoryItem } from '../lib/storage';
 
 export default function AnalyzePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -95,25 +99,16 @@ export default function AnalyzePage() {
         return;
       }
 
-      // Save to session-only history in localStorage
-      const historyItem: HistoryItem = {
+      // Save to session-only history safely (guarded against browser storage quota)
+      saveHistoryItem({
         id: predResult.analysis_id,
         prediction: predResult.prediction,
         confidence: predResult.confidence,
         timestamp: new Date().toISOString(),
         thumbnail: previewUrl || (gradcamResult ? toDataUrl(gradcamResult.original_image_base64) : ''),
         probabilities: predResult.probabilities,
-        gradcam: gradcamResult || undefined,
-      };
-
-      try {
-        const stored = localStorage.getItem('neuroscan_history');
-        const historyList: HistoryItem[] = stored ? JSON.parse(stored) : [];
-        historyList.unshift(historyItem);
-        localStorage.setItem('neuroscan_history', JSON.stringify(historyList.slice(0, 20)));
-      } catch (err) {
-        console.error('Failed to update session history:', err);
-      }
+        gradcam: null,
+      });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An error occurred during MRI analysis.';
       setErrorMessage(msg);
@@ -158,25 +153,16 @@ export default function AnalyzePage() {
         setGradcam(null);
       }
 
-      // 3. Save to session-only history in localStorage
-      const historyItem: HistoryItem = {
+      // 3. Save to session-only history safely (guarded against browser storage quota)
+      saveHistoryItem({
         id: predResult.analysis_id,
         prediction: predResult.prediction,
         confidence: predResult.confidence,
         timestamp: new Date().toISOString(),
-        thumbnail: sample.image_url || (gradcamResult ? toDataUrl(gradcamResult.original_image_base64) : ''),
+        thumbnail: sample.image_url,
         probabilities: predResult.probabilities,
-        gradcam: gradcamResult || undefined,
-      };
-
-      try {
-        const stored = localStorage.getItem('neuroscan_history');
-        const historyList: HistoryItem[] = stored ? JSON.parse(stored) : [];
-        historyList.unshift(historyItem);
-        localStorage.setItem('neuroscan_history', JSON.stringify(historyList.slice(0, 20)));
-      } catch (err) {
-        console.error('Failed to update session history:', err);
-      }
+        gradcam: null,
+      });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to analyze sample image.';
       setErrorMessage(msg);
@@ -249,7 +235,44 @@ export default function AnalyzePage() {
         </div>
       </section>
 
-      {/* 4. Try an Example & Report Section */}
+      {/* 4. NeuroCausal-X: SOTA Causal Explainability & Uncertainty Quantification */}
+      {prediction && !prediction.is_withheld && (
+        <section className="space-y-6 pt-2">
+          <div className="flex items-center gap-2.5 px-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse" />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              NeuroCausal-X™ Clinical Reasoning Suite
+              <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30">
+                SOTA Novelty Pipeline
+              </span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* Statistical Conformal Prediction & Epistemic Uncertainty */}
+            {prediction.conformal_prediction && (
+              <ConformalSetCard conformal={prediction.conformal_prediction} />
+            )}
+
+            {/* Quantitative Radiomics & Morphometric Profiler */}
+            {prediction.radiomics && (
+              <RadiomicProfileCard radiomics={prediction.radiomics} />
+            )}
+          </div>
+
+          {/* Counterfactual Digital Lesion Resection & Causal Attribution Slider */}
+          {prediction.counterfactual && (
+            <CounterfactualSlider
+              originalImageBase64={gradcam?.original_image_base64 || previewUrl || ''}
+              counterfactual={prediction.counterfactual}
+              originalPrediction={prediction.prediction}
+              originalConfidence={prediction.confidence}
+            />
+          )}
+        </section>
+      )}
+
+      {/* 5. Try an Example & Report Section */}
       <div ref={examplesRef} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         <div className="lg:col-span-8">
           <SampleSelector
@@ -266,7 +289,7 @@ export default function AnalyzePage() {
         </div>
       </div>
 
-      {/* 5. Educational Brain Tumor Information */}
+      {/* 6. Educational Brain Tumor Information */}
       <BrainTumorInfo />
 
       {/* Report Modal */}

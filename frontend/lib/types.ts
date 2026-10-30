@@ -29,6 +29,45 @@ export interface ValidationResult {
   reason?: string | null;
 }
 
+export interface ConformalPredictionResult {
+  prediction_set_95: string[];
+  prediction_set_90: string[];
+  coverage_guarantee: string;
+  is_singleton: boolean;
+  set_size: number;
+  ambiguity_status: string;
+  epistemic_uncertainty_score: number;
+  shannon_entropy: number;
+  normalized_entropy: number;
+  clinical_recommendation: string;
+}
+
+export interface RadiomicBiomarkersResult {
+  lesion_detected: boolean;
+  estimated_area_mm2: number;
+  estimated_area_pixels: number;
+  slice_occupancy_pct: number;
+  perimeter_mm: number;
+  sphericity_index: number;
+  margin_irregularity: number;
+  aspect_ratio: number;
+  anatomical_locus: string;
+  morphology_summary: string;
+  contour_overlay_base64?: string | null;
+  bounding_box?: { x: number; y: number; width: number; height: number } | null;
+  centroid?: { x: number; y: number } | null;
+}
+
+export interface CounterfactualResult {
+  counterfactual_image_base64: string;
+  counterfactual_prediction: string;
+  counterfactual_confidence: number;
+  counterfactual_probabilities: Record<string, number>;
+  causal_attribution_delta: number;
+  causal_verification_status: string;
+  explanation: string;
+}
+
 export interface PredictionResponse {
   analysis_id: string;
   prediction: string;
@@ -39,6 +78,9 @@ export interface PredictionResponse {
   validation?: ValidationResult;
   is_withheld?: boolean;
   withheld_reason?: string | null;
+  conformal_prediction?: ConformalPredictionResult;
+  radiomics?: RadiomicBiomarkersResult;
+  counterfactual?: CounterfactualResult;
 }
 
 export interface GradcamResponse {
@@ -100,5 +142,6 @@ export interface HistoryItem {
   timestamp: string;
   thumbnail: string;
   probabilities: Record<string, number>;
-  gradcam?: GradcamResponse;
+  gradcam?: GradcamResponse | null;
+  image_preview?: string;
 }
