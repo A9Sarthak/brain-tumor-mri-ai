@@ -14,7 +14,15 @@ const API_BASE_URL = typeof window !== 'undefined'
 
 export function toDataUrl(base64OrDataUrl: string): string {
   if (!base64OrDataUrl) return '';
-  if (base64OrDataUrl.startsWith('data:image/')) return base64OrDataUrl;
+  if (
+    base64OrDataUrl.startsWith('data:image/') ||
+    base64OrDataUrl.startsWith('blob:') ||
+    base64OrDataUrl.startsWith('/') ||
+    base64OrDataUrl.startsWith('http://') ||
+    base64OrDataUrl.startsWith('https://')
+  ) {
+    return base64OrDataUrl;
+  }
   return `data:image/png;base64,${base64OrDataUrl}`;
 }
 

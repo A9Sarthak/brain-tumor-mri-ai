@@ -3,6 +3,16 @@ import { HistoryItem } from './types';
 const STORAGE_KEY = 'neuroscan_history';
 const MAX_HISTORY_ITEMS = 6;
 
+// Auto-purge any legacy bloated history (>50KB) on module load to immediately reclaim browser quota
+if (typeof window !== 'undefined') {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw && raw.length > 50000) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {}
+}
+
 /**
  * Sanitizes a history item to ensure massive base64 images (>50KB) and
  * heavy multi-layer Grad-CAM overlays are not persisted into the 5MB browser localStorage quota.
@@ -10,8 +20,10 @@ const MAX_HISTORY_ITEMS = 6;
 function sanitizeHistoryItem(item: HistoryItem): HistoryItem {
   let thumb = item.thumbnail || item.image_preview || '';
 
-  // If thumbnail is a giant raw base64 string (>30KB), strip it from persistent localStorage
-  if (thumb.startsWith('data:image/') && thumb.length > 30000) {
+  // Base64 image payloads (data:image/...) are 1MB to 3MB each and will quickly blow past
+  // the browser's 5MB localStorage quota. Only allow short relative/absolute URLs (e.g. /samples/...)
+  // or blob URLs. Never persist raw base64 strings into localStorage.
+  if (thumb.startsWith('data:') || thumb.length > 1024) {
     thumb = '';
   }
 
@@ -40,10 +52,21 @@ export function saveHistoryItem(newItem: HistoryItem): void {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        list = JSON.parse(stored);
-        if (!Array.isArray(list)) list = [];
+        // If legacy stored string was bloated by previous un-sanitized versions (>100KB),
+        // purge it immediately to free up quota before writing.
+        if (stored.length > 50000) {
+          localStorage.removeItem(STORAGE_KEY);
+        } else {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            list = parsed.map(sanitizeHistoryItem);
+          }
+        }
       }
     } catch {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {}
       list = [];
     }
 
@@ -53,16 +76,18 @@ export function saveHistoryItem(newItem: HistoryItem): void {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     } catch {
-      // Storage quota exceeded: prune thumbnails from all items and reduce count
+      // Storage quota exceeded: purge existing key first to ensure space is reclaimed,
+      // then attempt saving a ultra-compact metadata-only list.
       try {
-        const lightweightList = list.slice(0, 3).map((it) => ({
+        localStorage.removeItem(STORAGE_KEY);
+        const metadataOnly = list.slice(0, 3).map((it) => ({
           ...it,
           thumbnail: '',
           image_preview: '',
         }));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(lightweightList));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(metadataOnly));
       } catch {
-        // Extreme fallback: reset key to prevent app crashing
+        // Extreme fallback: ensure key is removed so app never crashes
         try {
           localStorage.removeItem(STORAGE_KEY);
         } catch {}
@@ -81,8 +106,17 @@ export function getHistory(): HistoryItem[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
+    
+    // Automatically purge legacy un-sanitized bloated storage (>100KB)
+    if (stored.length > 50000) {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {}
+      return [];
+    }
+    
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.map(sanitizeHistoryItem) : [];
   } catch {
     return [];
   }
